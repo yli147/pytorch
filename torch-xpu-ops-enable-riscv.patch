@@ -1,0 +1,67 @@
+diff --git a/cmake/BuildFlags.cmake b/cmake/BuildFlags.cmake
+index 8474251..bb1fd5d 100644
+--- a/cmake/BuildFlags.cmake
++++ b/cmake/BuildFlags.cmake
+@@ -72,6 +72,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"
+   set(SYCL_KERNEL_OPTIONS ${SYCL_KERNEL_OPTIONS} ${SYCL_TARGETS_OPTION})
+   set(SYCL_KERNEL_OPTIONS ${SYCL_KERNEL_OPTIONS} -fno-sycl-unnamed-lambda)
+   set(SYCL_KERNEL_OPTIONS ${SYCL_KERNEL_OPTIONS} -sycl-std=2020)
++  set(SYCL_KERNEL_OPTIONS ${SYCL_KERNEL_OPTIONS} -fsycl-llc-options="-target-abi=lp64d -mcpu=sifive-u54")
+   if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+     set(SYCL_KERNEL_OPTIONS ${SYCL_KERNEL_OPTIONS} /fp:strict)
+   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+@@ -80,7 +81,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"
+     set(SYCL_KERNEL_OPTIONS ${SYCL_KERNEL_OPTIONS} -fno-associative-math)
+     set(SYCL_KERNEL_OPTIONS ${SYCL_KERNEL_OPTIONS} -fno-approx-func)
+     set(SYCL_KERNEL_OPTIONS ${SYCL_KERNEL_OPTIONS} -Wno-absolute-value)
+-    set(SYCL_KERNEL_OPTIONS ${SYCL_KERNEL_OPTIONS} -no-ftz)
++    # set(SYCL_KERNEL_OPTIONS ${SYCL_KERNEL_OPTIONS} -no-ftz)
+     # Equivalent to build option -fpreview-breaking-changes for SYCL compiler.
+     set(SYCL_KERNEL_OPTIONS ${SYCL_KERNEL_OPTIONS} -D__INTEL_PREVIEW_BREAKING_CHANGES)
+     set(SYCL_KERNEL_OPTIONS ${SYCL_KERNEL_OPTIONS} -D_GLIBCXX_USE_CXX11_ABI=${GLIBCXX_USE_CXX11_ABI})
+@@ -120,7 +121,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"
+   else()
+     set(SYCL_OFFLINE_COMPILER_AOT_OPTIONS "-device pvc,xe-lpg")
+   endif()
+-  set(SYCL_OFFLINE_COMPILER_FLAGS "${SYCL_OFFLINE_COMPILER_AOT_OPTIONS} ${SYCL_OFFLINE_COMPILER_CG_OPTIONS}")
++  # set(SYCL_OFFLINE_COMPILER_FLAGS "${SYCL_OFFLINE_COMPILER_AOT_OPTIONS} ${SYCL_OFFLINE_COMPILER_CG_OPTIONS}")
++  # set(SYCL_OFFLINE_COMPILER_FLAGS "-device pvc,xe-lpg")
++  set(SYCL_OFFLINE_COMPILER_FLAGS "-device pvc")
+ else()
+   message("Not compiling with XPU. Currently only support GCC compiler on Linux and MSVC compiler on Windows as CXX compiler.")
+   return()
+diff --git a/cmake/Modules/FindSYCL.cmake b/cmake/Modules/FindSYCL.cmake
+index 4e266a2..75d1805 100644
+--- a/cmake/Modules/FindSYCL.cmake
++++ b/cmake/Modules/FindSYCL.cmake
+@@ -409,7 +409,7 @@ macro(SYCL_LINK_DEVICE_OBJECTS output_file sycl_target)
+       COMMAND ${SYCL_EXECUTABLE}
+       ${SYCL_device_link_flags}
+       -fsycl-link ${object_files}
+-      -Xs "\"${SYCL_OFFLINE_COMPILER_FLAGS}\""
++      -Xs "${SYCL_OFFLINE_COMPILER_FLAGS}"
+       -o ${output_file}
+       COMMENT "Building SYCL device link file ${output_file_relative_path}"
+       )
+diff --git a/cmake/Modules/FindSYCLToolkit.cmake b/cmake/Modules/FindSYCLToolkit.cmake
+index 46e34c7..a89d478 100644
+--- a/cmake/Modules/FindSYCLToolkit.cmake
++++ b/cmake/Modules/FindSYCLToolkit.cmake
+@@ -27,6 +27,7 @@ This will define the following variables:
+ 
+ include(${TORCH_ROOT}/cmake/Modules/FindSYCLToolkit.cmake)
+ 
++message(WARNING "#################### DEBUG #############################")
+ if(NOT SYCL_FOUND)
+   set(SYCLTOOLKIT_FOUND FALSE)
+   return()
+@@ -42,7 +43,8 @@ include(${CMAKE_ROOT}/Modules/FindPackageHandleStandardArgs.cmake)
+ if(WIN32)
+   set(SYCL_EXECUTABLE_NAME icx)
+ else()
+-  set(SYCL_EXECUTABLE_NAME icpx)
++  set(SYCL_EXECUTABLE_NAME clang++)
++  # set(SYCL_EXECUTABLE_NAME clang++)
+ endif()
+ 
+ if(NOT SYCL_ROOT)
