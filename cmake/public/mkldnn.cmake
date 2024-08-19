@@ -4,7 +4,10 @@ if(CPU_AARCH64)
   include(${CMAKE_CURRENT_LIST_DIR}/ComputeLibrary.cmake)
 endif()
 
-find_package(MKLDNN QUIET)
+# find_package(MKLDNN QUIET)
+MESSAGE(WARNING "- DEBUG BEFORE FIND -")
+find_package(MKLDNN)
+MESSAGE(WARNING "- DEBUG AFTER FIND -")
 
 if(NOT TARGET caffe2::mkldnn)
   add_library(caffe2::mkldnn INTERFACE IMPORTED)

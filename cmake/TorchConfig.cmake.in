@@ -44,6 +44,7 @@ endmacro()
 
 include(FindPackageHandleStandardArgs)
 
+message(WARNING "############################################ dEBUG ###########################.")
 if(DEFINED ENV{TORCH_INSTALL_PREFIX})
   set(TORCH_INSTALL_PREFIX $ENV{TORCH_INSTALL_PREFIX})
 else()
@@ -110,6 +111,7 @@ else()
   endif()
 
   if(@USE_MKLDNN@)
+    message(WARNING "USE_MKLDNN DEBUG.")
     append_torchlib_if_found(dnnl mkldnn)
   endif()
 

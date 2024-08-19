@@ -1,5 +1,7 @@
 # RPATH stuff
 # see https://cmake.org/Wiki/CMake_RPATH_handling
+
+set(USE_MKLDNN ON)
 if(APPLE)
   set(CMAKE_MACOSX_RPATH ON)
   set(_rpath_portable_origin "@loader_path")
@@ -86,6 +88,7 @@ endif()
 # ---[ XPU
 if(USE_XPU)
   include(${CMAKE_CURRENT_LIST_DIR}/public/xpu.cmake)
+  message(WARNING "in finding xpu.cmake")
   if(NOT PYTORCH_FOUND_XPU)
     message(WARNING "Not compiling with XPU. Could NOT find SYCL."
     "Suppress this warning with -DUSE_XPU=OFF.")
@@ -1451,7 +1454,9 @@ if(NOT INTERN_BUILD_MOBILE)
     set(AT_ROCM_ENABLED 1)
   endif()
 
+  message("###USE_MKLDNN Liyong Debug 0###")
   if(USE_MKLDNN)
+    message("###USE_MKLDNN Liyong Debug 1###")
     if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
       message(WARNING
         "x64 operating system is required for MKLDNN. "
@@ -1562,6 +1567,7 @@ if(USE_KINETO)
 
   if(NOT USE_XPU)
     set(LIBKINETO_NOXPUPTI ON CACHE STRING "" FORCE)
+    message(STATUS "Using Kineto with XPUPTI off")
   else()
     set(LIBKINETO_NOXPUPTI OFF CACHE STRING "")
     message(STATUS "Using Kineto with XPUPTI support")

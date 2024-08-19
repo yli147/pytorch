@@ -6,6 +6,7 @@ if(TARGET torch::xpurt)
 endif()
 
 # Find SYCL library.
+message(DEBUG "#### This is a DEBUG Message ####")
 find_package(SYCLToolkit REQUIRED)
 if(NOT SYCL_FOUND)
   set(PYTORCH_FOUND_XPU FALSE)

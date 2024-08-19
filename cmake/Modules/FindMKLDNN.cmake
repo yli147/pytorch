@@ -23,8 +23,8 @@ IF(NOT MKLDNN_FOUND)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
       # Linux
       # g++ is soft linked to /usr/bin/cxx, oneDNN would not treat it as an absolute path
-      set(DNNL_HOST_COMPILER "g++")
-      set(SYCL_CXX_DRIVER "icpx")
+      # set(DNNL_HOST_COMPILER "g++")
+      set(SYCL_CXX_DRIVER "clang++")
       set(DNNL_LIB_NAME "libdnnl.a")
     else()
       # Windows
@@ -49,16 +49,15 @@ IF(NOT MKLDNN_FOUND)
       SOURCE_DIR ${MKLDNN_ROOT}
       PREFIX ${XPU_MKLDNN_DIR_PREFIX}
       BUILD_IN_SOURCE 0
-      CMAKE_ARGS  -DCMAKE_C_COMPILER=icx
+      CMAKE_ARGS  -DCMAKE_C_COMPILER=clang
       -DCMAKE_CXX_COMPILER=${SYCL_CXX_DRIVER}
       -DCMAKE_CXX_FLAGS=${ABI_NEUTRAL_FLAGS}
       -DDNNL_GPU_RUNTIME=SYCL
-      -DDNNL_CPU_RUNTIME=THREADPOOL
+      -DDNNL_CPU_RUNTIME=NONE
       -DDNNL_BUILD_TESTS=OFF
       -DDNNL_BUILD_EXAMPLES=OFF
       -DONEDNN_BUILD_GRAPH=OFF
       -DDNNL_LIBRARY_TYPE=STATIC
-      -DDNNL_DPCPP_HOST_COMPILER=${DNNL_HOST_COMPILER} # Use global cxx compiler as host compiler
       -G ${CMAKE_GENERATOR} # Align Generator to Torch
       BUILD_COMMAND ${DNNL_MAKE_COMMAND}
       BUILD_BYPRODUCTS "xpu_mkldnn_proj-prefix/src/xpu_mkldnn_proj-build/src/${DNNL_LIB_NAME}"
@@ -76,6 +75,7 @@ IF(NOT MKLDNN_FOUND)
     add_dependencies(xpu_mkldnn xpu_mkldnn_proj)
     target_link_libraries(xpu_mkldnn INTERFACE ${__XPU_MKLDNN_BUILD_DIR}/src/${DNNL_LIB_NAME})
     target_include_directories(xpu_mkldnn INTERFACE ${XPU_MKLDNN_INCLUDE})
+    RETURN()
   endif()
 
   IF(NOT APPLE AND NOT WIN32 AND NOT BUILD_LITE_INTERPRETER)
@@ -116,7 +116,8 @@ IF(NOT MKLDNN_FOUND)
 
   SET(MKL_cmake_included TRUE)
   IF(NOT MKLDNN_CPU_RUNTIME)
-    SET(MKLDNN_CPU_RUNTIME "OMP" CACHE STRING "")
+	  # SET(MKLDNN_CPU_RUNTIME "OMP" CACHE STRING "")
+    SET(MKLDNN_CPU_RUNTIME "SEQ" CACHE STRING "")
   ELSEIF(MKLDNN_CPU_RUNTIME STREQUAL "TBB")
     IF(TARGET TBB::tbb)
       MESSAGE(STATUS "MKL-DNN is using TBB")
@@ -132,6 +133,10 @@ IF(NOT MKLDNN_FOUND)
     ENDIF()
   ENDIF()
   MESSAGE(STATUS "MKLDNN_CPU_RUNTIME = ${MKLDNN_CPU_RUNTIME}")
+
+  SET(ONEDNN_CPU_RUNTIME "NONE")
+  SET(ONEDNN_GPU_RUNTIME "SYCL")
+  SET(ONEDNN_BUILD_TESTS "OFF")
 
   SET(MKLDNN_CPU_RUNTIME ${MKLDNN_CPU_RUNTIME} CACHE STRING "" FORCE)
   SET(DNNL_BUILD_TESTS FALSE CACHE BOOL "" FORCE)

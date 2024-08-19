@@ -13,6 +13,11 @@
 #  MKL_CDFT_LIBRARIES - list of libraries to add for the solvers
 
 # Do nothing if MKL_FOUND was set before!
+set(MKL_FOUND TRUE)
+INCLUDE(CheckTypeSize)
+INCLUDE(CheckFunctionExists)
+MESSAGE(WARNING "MKL_FOUND DEBUG")
+
 IF (NOT MKL_FOUND)
 
 SET(MKL_VERSION)
@@ -477,3 +482,4 @@ ENDIF(NOT MKL_FIND_QUIETLY)
 
 # Do nothing if MKL_FOUND was set before!
 ENDIF (NOT MKL_FOUND)
+set(MKL_FOUND false)
