@@ -31,7 +31,8 @@ void enumDevices(std::vector<std::unique_ptr<sycl::device>>& devices) {
   auto platform_list = sycl::platform::get_platforms();
   // Enumerated GPU devices from the specific platform.
   for (const auto& platform : platform_list) {
-    if (platform.get_backend() != sycl::backend::ext_oneapi_level_zero) {
+    if ((platform.get_backend() != sycl::backend::ext_oneapi_level_zero) ||
+       (platform.get_backend() != sycl::backend::opencl)) {
       continue;
     }
     auto device_list = platform.get_devices();
